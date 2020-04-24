@@ -1,5 +1,13 @@
 package q005;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.stream.Collectors;
+
 /**
  * Q005 データクラスと様々な集計
  *
@@ -30,5 +38,55 @@ T-7-30002: xx時間xx分
 （省略）
  */
 public class Q005 {
+
+    public static void main(String[] args) {
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(openDataFile(), StandardCharsets.UTF_8))) {
+
+            // 社員番号,部署名,役職名,P-CODE,作業時間
+            List<WorkData> data = new ArrayList<>();
+            String line;
+            for (int index = 0; (line = reader.readLine()) != null; index++) {
+                if (index != 0) {
+                    WorkData workData = new WorkData(line.split(","));
+                    data.add(workData);
+                }
+            }
+            // 役職別に出力
+            Map<String, Integer> totalWorkTimeByPosition = data.stream().collect(
+                    Collectors.groupingBy(WorkData::getPosition, LinkedHashMap::new,
+                            Collectors.summingInt(WorkData::getWorkTime)));
+            outputTotalWorkTime(totalWorkTimeByPosition);
+
+            // Pコード別に出力
+            Map<String, Integer> totalWorkTimeByPcode = data.stream().collect(
+                    Collectors.groupingBy(WorkData::getPCode, LinkedHashMap::new,
+                            Collectors.summingInt(WorkData::getWorkTime)));
+            outputTotalWorkTime(totalWorkTimeByPcode);
+
+            // 社員番号別に出力
+            Map<String, Integer> totalWorkTimeByNumber = data.stream().collect(
+                    Collectors.groupingBy(WorkData::getNumber, LinkedHashMap::new,
+                            Collectors.summingInt(WorkData::getWorkTime)));
+            outputTotalWorkTime(totalWorkTimeByNumber);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static InputStream openDataFile() {
+        return Q005.class.getResourceAsStream("data.txt");
+    }
+
+    private static void outputTotalWorkTime(Map<String, Integer> totalWorkTimeByKey) {
+        totalWorkTimeByKey.entrySet().stream()
+                .map(e -> e.getKey() + ": " + convertTimeNotation(e.getValue()))
+                .forEach(System.out::println);
+    }
+
+    private static String convertTimeNotation(Integer min) {
+        return (min / 60) + "時間" + (min % 60) + "分";
+    }
 }
-// 完成までの時間: xx時間 xx分
+// 完成までの時間: 1時間 20分

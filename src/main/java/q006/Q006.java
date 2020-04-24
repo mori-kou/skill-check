@@ -1,11 +1,12 @@
 package q006;
 
-import q006.value.DecimalValue;
-import q006.value.IValue;
-import q006.value.PlusValue;
+import q006.value.*;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
+import java.util.Stack;
 
 /**
  * Q006 空気を読んで改修
@@ -29,8 +30,24 @@ import java.util.List;
  * （または -1.00 など、小数点に0がついてもよい）
  */
 public class Q006 {
+
+    public static void main(String[] args) {
+        Scanner scan = new Scanner(System.in);
+        System.out.println("入力してください");
+        String str = scan.nextLine();
+
+        if (!str.isEmpty()) {
+            List<IValue> iValueList = parseLine(str);
+            Stack<BigDecimal> values = new Stack<>();
+            iValueList.forEach(iValue -> iValue.execute(values));
+            System.out.println(values.pop());
+        }
+        scan.close();
+    }
+
     /**
      * 逆ポーランドで記載された1行のテキストを分解する
+     *
      * @param lineText 1行テキスト
      * @return 分解された値リスト
      */
@@ -38,10 +55,18 @@ public class Q006 {
         List<IValue> resultList = new ArrayList<>();
         // 空白文字で区切ってループする
         for (String text: lineText.split("[\\s]+")) {
-            // TODO 一部処理だけ実装
             switch (text) {
                 case "+":   // 足し算
                     resultList.add(new PlusValue());
+                    break;
+                case "-":
+                    resultList.add(new MinusValue());
+                    break;
+                case "/":
+                    resultList.add(new DividedValue());
+                    break;
+                case "*":
+                    resultList.add(new TimesValue());
                     break;
                 default:    // その他は数値として扱う
                     resultList.add(new DecimalValue(text));
@@ -51,4 +76,4 @@ public class Q006 {
         return resultList;
     }
 }
-// 完成までの時間: xx時間 xx分
+// 完成までの時間: 0時間 45分
